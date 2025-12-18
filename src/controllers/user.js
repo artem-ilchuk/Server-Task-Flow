@@ -1,4 +1,4 @@
-import UserCollection from '../models/userSchema.js';
+import User from '../models/userSchema.js';
 import { getCurrentUser } from '../services/user.js';
 import { getEnvVar } from '../utils/getEnvVar.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
@@ -34,7 +34,7 @@ export const addUserAvatarController = async (req, res) => {
     }
   }
 
-  const updatedUser = await UserCollection.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     userId,
     { avatar: avatarUrl },
     { new: true },
@@ -51,7 +51,7 @@ export const patchUserNameController = async (req, res) => {
   const userId = req.user._id;
   const userName = req.body.name;
 
-  const updatedUser = await UserCollection.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     userId,
     { name: userName },
     { new: true },
