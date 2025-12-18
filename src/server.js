@@ -15,7 +15,7 @@ export const setupServer = async () => {
   const app = express();
   app.use(
     cors({
-      origin: ['http://localhost:5173', 'https://task-flow-qis6.vercel.app/'],
+      origin: ['http://localhost:5173', 'https://task-flow-qis6.vercel.app'],
       credentials: true,
     }),
   );

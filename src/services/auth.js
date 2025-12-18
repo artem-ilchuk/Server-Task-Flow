@@ -1,24 +1,22 @@
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
-import UserCollection from '../models/userSchema.js';
-import SessionCollection from '../models/sessionSchema.js';
+import User from '../models/userSchema.js';
+import Session from '../models/sessionSchema.js';
 import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import { getEnvVar } from '../utils/getEnvVar.js';
-import fs from "node:fs/promises";
+import fs from 'node:fs/promises';
 import { SMTP, TEMPLATES_DIR } from '../constants/index.js';
 import handlebars from 'handlebars';
 import { sendEmail } from '../utils/sendMail.js';
 
-
-
 export const registerUser = async (payload) => {
-  const existingUser = await UserCollection.findOne({ email: payload.email });
+  const existingUser = await User.findOne({ email: payload.email });
   if (existingUser) throw createHttpError(409, 'Email in use');
 
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
-  const user = await UserCollection.create({
+  const user = await User.create({
     ...payload,
     password: encryptedPassword,
   });
@@ -26,7 +24,7 @@ export const registerUser = async (payload) => {
   const accessToken = randomBytes(30).toString('base64');
   const refreshToken = randomBytes(30).toString('base64');
 
-  const session = await SessionCollection.create({
+  const session = await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -41,7 +39,7 @@ export const registerUser = async (payload) => {
 };
 
 export const loginUser = async (payload) => {
-  const user = await UserCollection.findOne({ email: payload.email });
+  const user = await User.findOne({ email: payload.email });
   if (!user) throw createHttpError(400, 'User not found');
 
   const isEqual = await bcrypt.compare(payload.password, user.password);
@@ -49,12 +47,12 @@ export const loginUser = async (payload) => {
     throw createHttpError(401, 'Unauthorized');
   }
 
-  await SessionCollection.deleteOne({ userId: user._id });
+  await Session.deleteOne({ userId: user._id });
 
   const accessToken = randomBytes(30).toString('base64');
   const refreshToken = randomBytes(30).toString('base64');
 
-  const session = await SessionCollection.create({
+  const session = await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -69,7 +67,7 @@ export const loginUser = async (payload) => {
 };
 
 export const logoutUser = async (sessionId, refreshToken) => {
-  await SessionCollection.deleteOne({ _id: sessionId, refreshToken });
+  await Session.deleteOne({ _id: sessionId, refreshToken });
   return undefined;
 };
 
@@ -77,18 +75,18 @@ export async function loginOrRegister(email, name) {
   const accessToken = randomBytes(30).toString('base64');
   const refreshToken = randomBytes(30).toString('base64');
 
-  const user = await UserCollection.findOne({ email });
+  const user = await User.findOne({ email });
 
   if (!user) {
     const password = await bcrypt.hash(randomBytes(30).toString('base64'), 10);
 
-    const newUser = await UserCollection.create({
+    const newUser = await User.create({
       name,
       email,
       password,
     });
 
-    return await SessionCollection.create({
+    return await Session.create({
       userId: newUser._id,
       accessToken,
       refreshToken,
@@ -97,8 +95,8 @@ export async function loginOrRegister(email, name) {
     });
   }
 
-  await SessionCollection.deleteOne({ userId: user._id });
-  return await SessionCollection.create({
+  await Session.deleteOne({ userId: user._id });
+  return await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -109,7 +107,7 @@ export async function loginOrRegister(email, name) {
 
 export const requestResetPassword = async (email) => {
   try {
-    const user = await UserCollection.findOne({ email });
+    const user = await User.findOne({ email });
 
     if (!user) {
       throw createHttpError(404, 'User not found');
@@ -151,7 +149,7 @@ export const requestResetPassword = async (email) => {
 export const resetPassword = async (payload) => {
   try {
     const entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
-    const user = await UserCollection.findOne({
+    const user = await User.findOne({
       email: entries.email,
       _id: entries.sub,
     });
@@ -162,13 +160,9 @@ export const resetPassword = async (payload) => {
 
     const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
-    await UserCollection.updateOne(
-      { _id: user._id },
-      { password: encryptedPassword },
-    );
+    await User.updateOne({ _id: user._id }, { password: encryptedPassword });
 
-    await SessionCollection.deleteOne({ userId: user._id });
-    
+    await Session.deleteOne({ userId: user._id });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       throw createHttpError(401, 'Token is unauthorized');
