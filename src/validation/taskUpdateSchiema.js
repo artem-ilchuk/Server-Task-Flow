@@ -14,7 +14,7 @@ export const taskSchema = Joi.object({
 export const taskUpdateSchema = Joi.object({
   title: Joi.string().min(1).max(100),
   description: Joi.string().allow('', null),
-  status: Joi.string().valid('TODO', 'IN_PROGRESS', 'ON_REVIEW', 'DONE'),
+  status: Joi.string().min(1).max(50).required(),
   deadline: Joi.date().allow(null),
   priority: Joi.string().valid('low', 'medium', 'high'),
   projectId: Joi.string(),
