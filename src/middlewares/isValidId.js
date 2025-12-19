@@ -1,14 +1,16 @@
-// src/middlewares/isValidId.js
-
 import { isValidObjectId } from 'mongoose';
 import createHttpError from 'http-errors';
 
 export const isValidId = (req, res, next) => {
-  const { transactionId } = req.params;
-  if (!isValidObjectId(projectId)) {
-    throw createHttpError(
-      400,
-      'Bad Request. The ID in the URL seems invalid. Please double-check it.',
+  const { projectId, taskId } = req.params;
+  const id = projectId || taskId;
+
+  if (id && !isValidObjectId(id)) {
+    return next(
+      createHttpError(
+        400,
+        `Bad Request. The ID "${id}" is invalid. Please double-check it.`,
+      ),
     );
   }
 
