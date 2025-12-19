@@ -2,13 +2,16 @@ import { Router } from 'express';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import {
-  createTaskController,
-  getTasksByProjectController,
-  getTaskByIdController,
-  updateTaskController,
-  deleteTaskController,
-} from '../controllers/task.js';
-import { taskSchema, taskUpdateSchema } from '../models/';
+  projectSchema,
+  projectUpdateSchema,
+} from '../validation/projectUpdateSchiema.js';
+import {
+  createProjectController,
+  getProjectsController,
+  getProjectByIdController,
+  updateProjectController,
+  deleteProjectController,
+} from '../controllers/projects.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { isValidId } from '../middlewares/isValidId.js';
 
@@ -16,23 +19,20 @@ const router = Router();
 
 router.use(authenticate);
 
-router.post('/', validateBody(taskSchema), ctrlWrapper(createTaskController));
-
-router.get(
-  '/project/:projectId',
-  isValidId,
-  ctrlWrapper(getTasksByProjectController),
+router.post(
+  '/',
+  validateBody(projectSchema),
+  ctrlWrapper(createProjectController),
 );
-
-router.get('/:taskId', isValidId, ctrlWrapper(getTaskByIdController));
-
+router.get('/', ctrlWrapper(getProjectsController));
+router.get('/:projectId', isValidId, ctrlWrapper(getProjectByIdController));
 router.patch(
-  '/:taskId',
+  '/:projectId',
   isValidId,
-  validateBody(taskUpdateSchema),
-  ctrlWrapper(updateTaskController),
+  validateBody(projectUpdateSchema),
+  ctrlWrapper(updateProjectController),
 );
 
-router.delete('/:taskId', isValidId, ctrlWrapper(deleteTaskController));
+router.delete('/:projectId', isValidId, ctrlWrapper(deleteProjectController));
 
 export default router;

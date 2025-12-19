@@ -1,4 +1,4 @@
-import Project from '../models/projectSchema.js';
+import Project from '../models/projectsSchiema.js';
 import createHttpError from 'http-errors';
 
 export const createProject = async ({ ownerId, payload }) => {

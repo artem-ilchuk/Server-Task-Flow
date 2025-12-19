@@ -15,11 +15,7 @@ export const registerUser = async (payload) => {
   if (existingUser) throw createHttpError(409, 'Email in use');
 
   const encryptedPassword = await bcrypt.hash(payload.password, 10);
-
-  const user = await User.create({
-    ...payload,
-    password: encryptedPassword,
-  });
+  const user = await User.create({ ...payload, password: encryptedPassword });
 
   const accessToken = randomBytes(30).toString('base64');
   const refreshToken = randomBytes(30).toString('base64');
@@ -32,10 +28,7 @@ export const registerUser = async (payload) => {
     refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
-  return {
-    user,
-    session,
-  };
+  return { user, session };
 };
 
 export const loginUser = async (payload) => {
@@ -43,9 +36,7 @@ export const loginUser = async (payload) => {
   if (!user) throw createHttpError(400, 'User not found');
 
   const isEqual = await bcrypt.compare(payload.password, user.password);
-  if (!isEqual) {
-    throw createHttpError(401, 'Unauthorized');
-  }
+  if (!isEqual) throw createHttpError(401, 'Unauthorized');
 
   await Session.deleteOne({ userId: user._id });
 
@@ -60,118 +51,66 @@ export const loginUser = async (payload) => {
     refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
-  return {
-    user,
-    session,
-  };
+  return { user, session };
 };
 
-export const logoutUser = async (sessionId, refreshToken) => {
-  await Session.deleteOne({ _id: sessionId, refreshToken });
-  return undefined;
+export const logoutUser = async (sessionId) => {
+  await Session.deleteOne({ _id: sessionId });
 };
 
-export async function loginOrRegister(email, name) {
-  const accessToken = randomBytes(30).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
+export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+  const oldSession = await Session.findOne({ _id: sessionId, refreshToken });
+  if (!oldSession) throw createHttpError.Unauthorized('Session not found');
 
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    const password = await bcrypt.hash(randomBytes(30).toString('base64'), 10);
-
-    const newUser = await User.create({
-      name,
-      email,
-      password,
-    });
-
-    return await Session.create({
-      userId: newUser._id,
-      accessToken,
-      refreshToken,
-      accessTokenValidUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    });
+  if (new Date() > new Date(oldSession.refreshTokenValidUntil)) {
+    throw createHttpError.Unauthorized('Session token expired');
   }
 
-  await Session.deleteOne({ userId: user._id });
+  await Session.deleteOne({ _id: sessionId, refreshToken });
+
+  const accessToken = randomBytes(30).toString('base64');
+  const newRefreshToken = randomBytes(30).toString('base64');
+
   return await Session.create({
-    userId: user._id,
+    userId: oldSession.userId,
     accessToken,
-    refreshToken,
+    refreshToken: newRefreshToken,
     accessTokenValidUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
     refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
-}
+};
 
 export const requestResetPassword = async (email) => {
-  try {
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
+  if (!user) throw createHttpError(404, 'User not found');
 
-    if (!user) {
-      throw createHttpError(404, 'User not found');
-    }
+  const resetToken = jwt.sign(
+    { sub: user._id, email },
+    getEnvVar('JWT_SECRET'),
+    { expiresIn: '5m' },
+  );
 
-    const resetToken = jwt.sign(
-      {
-        sub: user._id,
-        email,
-      },
-      getEnvVar('JWT_SECRET'),
-      {
-        expiresIn: '5m',
-      },
-    );
+  const templateSource = (await fs.readFile(TEMPLATES_DIR)).toString();
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    name: user.name,
+    link: `${getEnvVar('APP_DOMAIN')}/?token=${resetToken}`,
+  });
 
-    const templateSource = (await fs.readFile(TEMPLATES_DIR)).toString();
-
-    const template = handlebars.compile(templateSource);
-    const html = template({
-      name: user.name,
-      link: `${getEnvVar('APP_DOMAIN')}/?token=${resetToken}`,
-    });
-
-    await sendEmail({
-      from: getEnvVar(SMTP.SMTP_FROM),
-      to: email,
-      subject: 'Reset your password',
-      html,
-    });
-  } catch (error) {
-    throw createHttpError(
-      error.status || 500,
-      error.message || 'Failed to send reset email',
-    );
-  }
+  await sendEmail({
+    from: getEnvVar(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html,
+  });
 };
 
 export const resetPassword = async (payload) => {
-  try {
-    const entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
-    const user = await User.findOne({
-      email: entries.email,
-      _id: entries.sub,
-    });
+  const entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
+  const user = await User.findOne({ email: entries.email, _id: entries.sub });
+  if (!user) throw createHttpError(404, 'User not found');
 
-    if (!user) {
-      throw createHttpError(404, 'User not found');
-    }
-
-    const encryptedPassword = await bcrypt.hash(payload.password, 10);
-
-    await User.updateOne({ _id: user._id }, { password: encryptedPassword });
-
-    await Session.deleteOne({ userId: user._id });
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      throw createHttpError(401, 'Token is unauthorized');
-    }
-
-    if (error.name === 'TokenExpiredError') {
-      throw createHttpError(401, 'Token is expired');
-    }
-
-    throw error;
-  }
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+  await User.updateOne({ _id: user._id }, { password: encryptedPassword });
+  await Session.deleteOne({ userId: user._id });
 };

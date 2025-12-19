@@ -1,4 +1,4 @@
-import Task from '../models/taskSchema.js';
+import Task from '../models/taskSchiema.js';
 import createHttpError from 'http-errors';
 
 export const createTask = async ({ ownerId, projectId, payload }) => {

@@ -1,10 +1,10 @@
 import {
   createTask,
-  getTasksByProject,
   getTaskById,
+  getTasksByProject,
   updateTask,
   deleteTask,
-} from '../services/task.js';
+} from '../services/tasks.js';
 
 export const createTaskController = async (req, res) => {
   const ownerId = req.user._id;

@@ -1,11 +1,10 @@
 import {
   createProject,
+  updateProject,
   getProjectsByUser,
   getProjectById,
-  updateProject,
   deleteProject,
-} from '../services/project.js';
-
+} from '../services/projects.js';
 export const createProjectController = async (req, res) => {
   const project = await createProject({
     ownerId: req.user._id,

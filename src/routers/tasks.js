@@ -2,13 +2,16 @@ import { Router } from 'express';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import {
+  taskSchema,
+  taskUpdateSchema,
+} from '../validation/taskUpdateSchiema.js';
+import {
   createTaskController,
   getTasksByProjectController,
   getTaskByIdController,
   updateTaskController,
   deleteTaskController,
-} from '../controllers/task.js';
-import { taskSchema, taskUpdateSchema } from '../models/';
+} from '../controllers/tasks.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { isValidId } from '../middlewares/isValidId.js';
 
