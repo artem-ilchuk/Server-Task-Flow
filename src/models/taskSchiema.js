@@ -15,6 +15,7 @@ const taskSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
     },
     description: {
       type: String,
@@ -23,6 +24,8 @@ const taskSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
+      enum: ['TO DO', 'IN PROGRESS', 'ON REVIEW', 'DONE'],
+      default: 'TO DO',
     },
     deadline: {
       type: Date,
@@ -33,7 +36,10 @@ const taskSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
 const Task = mongoose.model('Task', taskSchema);
