@@ -21,11 +21,15 @@ const taskSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    title: { type: String, required: true },
     status: {
       type: String,
       enum: ['To Do', 'In Progress', 'Done', 'Backlog', 'Review'],
       default: 'To Do',
+    },
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium',
     },
     deadline: {
       type: Date,
