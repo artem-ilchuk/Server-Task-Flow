@@ -1,12 +1,6 @@
 import path from 'node:path';
 
-export const VALID_STATUSES = [
-  'backlog',
-  'todo',
-  'in-progress',
-  'review',
-  'done',
-];
+export const VALID_STATUSES = ['To Do', 'In Progress', 'Done', 'Review'];
 
 export const SORT_ORDER = {
   ASC: 'asc',

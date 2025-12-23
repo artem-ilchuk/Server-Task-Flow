@@ -7,7 +7,7 @@ export const taskSchema = Joi.object({
   projectId: Joi.string().required(),
   status: Joi.string()
     .valid(...VALID_STATUSES)
-    .default('todo'),
+    .default.default('To Do'),
   deadline: Joi.date().allow(null),
 });
 
