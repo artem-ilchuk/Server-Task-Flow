@@ -1,5 +1,12 @@
-// src/constants/index.js
 import path from 'node:path';
+
+export const VALID_STATUSES = [
+  'backlog',
+  'todo',
+  'in-progress',
+  'review',
+  'done',
+];
 
 export const SORT_ORDER = {
   ASC: 'asc',
