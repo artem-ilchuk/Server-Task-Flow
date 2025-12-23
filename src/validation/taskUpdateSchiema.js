@@ -5,10 +5,10 @@ export const taskSchema = Joi.object({
   status: Joi.string()
     .valid(...VALID_STATUSES)
     .default('To Do'),
-  deadline: Joi.date().allow(null),
   priority: Joi.string().valid('low', 'medium', 'high').default('medium'),
+  deadline: Joi.date().allow(null),
+  assignedTo: Joi.string().hex().length(24).allow(null),
 });
-
 export const taskUpdateSchema = Joi.object({
   title: Joi.string(),
   description: Joi.string().allow(''),
