@@ -8,7 +8,17 @@ import {
 } from '../services/tasks.js';
 
 export const createTaskController = async (req, res) => {
-  console.log('--- START CONTROLLER ---');
+  // Если этот лог не появится, а придет старая ошибка — значит файл не обновился
+  console.log('--- CHECKING REQ.USER VERSION 2.0 ---');
+
+  if (!req.user) {
+    return res.status(401).json({
+      message: 'THIS_IS_NEW_ERROR_MESSAGE', // Измени сообщение на уникальное
+      debug: 'If you see this, the file is updated',
+    });
+  }
+
+  const ownerId = req.user._id;
   try {
     const ownerId = req.user._id;
     const { projectId, ...payload } = req.body;

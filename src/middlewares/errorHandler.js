@@ -1,14 +1,16 @@
-import { HttpError } from 'http-errors';
+import { isHttpError } from 'http-errors';
 
 export const errorHandler = (err, req, res, next) => {
-  if (err instanceof HttpError) {
-    res.status(err.status).json({
+  // Используем встроенную функцию проверки из библиотеки
+  if (isHttpError(err)) {
+    return res.status(err.status).json({
       status: err.status,
-      message: err.name,
-      data: err,
+      message: err.message, // Выводим реальное сообщение ошибки
     });
-    return;
   }
+
+  // Логируем системные ошибки (500), чтобы видеть их в консоли Render
+  console.error('SERVER_ERROR:', err);
 
   res.status(500).json({
     message: 'Something went wrong',
