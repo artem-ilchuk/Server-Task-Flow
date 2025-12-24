@@ -5,6 +5,7 @@ import {
   updateTask,
   deleteTask,
 } from '../services/tasks.js';
+import User from '../models/userSchema.js';
 
 export const createTaskController = async (req, res) => {
   const ownerId = req.user._id;
