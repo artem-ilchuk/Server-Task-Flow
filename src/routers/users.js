@@ -4,6 +4,6 @@ import { getAllUsers } from '../controllers/projects.js';
 
 const router = Router();
 
-router.get('/members/all', ctrlWrapper(getAllUsers));
+router.get('/all', ctrlWrapper(getAllUsers));
 
 export default router;
