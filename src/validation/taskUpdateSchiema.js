@@ -1,3 +1,6 @@
+import Joi from 'joi';
+import { VALID_STATUSES } from '../constants/index.js';
+
 export const taskSchema = Joi.object({
   title: Joi.string().required(),
   description: Joi.string().allow(''),
@@ -16,4 +19,5 @@ export const taskUpdateSchema = Joi.object({
   deadline: Joi.date().allow(null),
   order: Joi.number(),
   priority: Joi.string().valid('low', 'medium', 'high'),
+  assignedTo: Joi.string().hex().length(24).allow(null),
 });

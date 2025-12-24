@@ -1,19 +1,29 @@
 import Task from '../models/taskSchiema.js';
 import createHttpError from 'http-errors';
 
-export const createTask = async ({ ownerId, projectId, payload }) => {
-  return await Task.create({
+export const createTask = async (req, res) => {
+  const { _id: ownerId } = req.user;
+  const taskData = {
+    ...req.body,
     ownerId,
-    projectId,
-    ...payload,
+  };
+
+  const newTask = await Task.create(taskData);
+
+  res.status(201).json({
+    status: 201,
+    message: 'Task created successfully',
+    data: newTask,
   });
 };
 
 export const getTasksByProject = async ({ ownerId, projectId }) => {
-  return await Task.find({ ownerId, projectId }).sort({
-    order: 1,
-    createdAt: 1,
-  });
+  return await Task.find({ ownerId, projectId })
+    .populate('assignedTo', 'name avatar email')
+    .sort({
+      order: 1,
+      createdAt: 1,
+    });
 };
 
 export const getTaskById = async ({ ownerId, taskId }) => {

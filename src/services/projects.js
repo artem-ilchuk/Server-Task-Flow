@@ -35,3 +35,17 @@ export const deleteProject = async ({ projectId, ownerId }) => {
   if (!project) throw createHttpError(404, 'Project not found');
   return project;
 };
+
+export const getProjectTasks = async (req, res) => {
+  const { projectId } = req.params;
+
+  const tasks = await Task.find({ projectId })
+    .populate('assignedTo', 'name avatar email')
+    .sort({ order: 1 });
+
+  res.status(200).json({
+    status: 200,
+    message: 'Tasks found',
+    data: tasks,
+  });
+};

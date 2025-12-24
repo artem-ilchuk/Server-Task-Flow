@@ -14,6 +14,7 @@ import {
 } from '../controllers/projects.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { getAllUsers } from '../controllers/projects.js';
 
 const router = Router();
 
