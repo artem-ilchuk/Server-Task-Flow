@@ -8,36 +8,19 @@ import {
 } from '../services/tasks.js';
 
 export const createTaskController = async (req, res) => {
-  // Проверяем наличие пользователя без деструктуризации аргументов
-  if (!req || !req.user) {
-    throw createHttpError(
-      401,
-      'User not found in request context. Check middleware chain.',
-    );
-  }
-
+  console.log('--- START CONTROLLER ---');
   try {
     const ownerId = req.user._id;
     const { projectId, ...payload } = req.body;
 
-    if (!projectId) {
-      throw createHttpError(400, 'projectId is required');
-    }
+    console.log('OWNER:', ownerId);
+    console.log('PROJECT:', projectId);
 
-    const task = await createTask({
-      ownerId,
-      projectId,
-      payload,
-    });
-
-    res.status(201).json({
-      status: 201,
-      message: 'Task created successfully',
-      data: task,
-    });
-  } catch (error) {
-    // Если это ошибка Mongoose или сервиса, пробрасываем её дальше в ctrlWrapper
-    throw error;
+    const task = await createTask({ ownerId, projectId, payload });
+    res.status(201).json({ status: 201, data: task });
+  } catch (err) {
+    console.error('--- CONTROLLER ERROR ---', err.message);
+    res.status(500).json({ status: 500, error: err.message });
   }
 };
 
