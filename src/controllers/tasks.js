@@ -1,66 +1,12 @@
-import createHttpError from 'http-errors';
-import {
-  createTask,
-  getTaskById,
-  getTasksByProject,
-  updateTask,
-  deleteTask,
-} from '../services/tasks.js';
-
+// src/controllers/tasks.js
 export const createTaskController = async (req, res) => {
-  // Если этот лог не появится, а придет старая ошибка — значит файл не обновился
-  console.log('--- CHECKING REQ.USER VERSION 2.0 ---');
-
-  if (!req.user) {
-    return res.status(401).json({
-      message: 'THIS_IS_NEW_ERROR_MESSAGE', // Измени сообщение на уникальное
-      debug: 'If you see this, the file is updated',
-    });
-  }
-
-  const ownerId = req.user._id;
-  try {
-    const ownerId = req.user._id;
-    const { projectId, ...payload } = req.body;
-
-    console.log('OWNER:', ownerId);
-    console.log('PROJECT:', projectId);
-
-    const task = await createTask({ ownerId, projectId, payload });
-    res.status(201).json({ status: 201, data: task });
-  } catch (err) {
-    console.error('--- CONTROLLER ERROR ---', err.message);
-    res.status(500).json({ status: 500, error: err.message });
-  }
+  res.status(200).json({
+    message: 'IF_YOU_SEE_THIS_WE_WON',
+    note: 'The file is finally updated',
+  });
 };
 
-export const getTasksByProjectController = async (req, res) => {
-  const ownerId = req.user._id;
-  const projectId = req.params.projectId;
-  const tasks = await getTasksByProject({ ownerId, projectId });
-  res.status(200).json({ status: 200, data: tasks });
-};
-
-export const getTaskByIdController = async (req, res) => {
-  const ownerId = req.user._id;
-  const taskId = req.params.taskId;
-  const task = await getTaskById({ ownerId, taskId });
-  res.status(200).json({ status: 200, data: task });
-};
-
-export const updateTaskController = async (req, res) => {
-  const ownerId = req.user._id;
-  const taskId = req.params.taskId;
-  const payload = req.body;
-  const task = await updateTask({ ownerId, taskId, payload });
-  res
-    .status(200)
-    .json({ status: 200, message: 'Task updated successfully', data: task });
-};
-
-export const deleteTaskController = async (req, res) => {
-  const ownerId = req.user._id;
-  const taskId = req.params.taskId;
-  await deleteTask({ ownerId, taskId });
-  res.status(204).send();
-};
+export const getTasksByProjectController = () => {};
+export const getTaskByIdController = () => {};
+export const updateTaskController = () => {};
+export const deleteTaskController = () => {};
