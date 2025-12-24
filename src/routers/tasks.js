@@ -19,7 +19,7 @@ const router = Router();
 
 router.use(authenticate);
 
-router.post('/', validateBody(taskSchema), ctrlWrapper(createTaskController));
+router.post('/', ctrlWrapper(createTaskController));
 
 router.get(
   '/project/:projectId',

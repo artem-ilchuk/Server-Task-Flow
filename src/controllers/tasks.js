@@ -9,19 +9,35 @@ import User from '../models/userSchema.js';
 
 export const createTaskController = async (req, res) => {
   if (!req.user) {
-    throw createHttpError(401, 'User not found in request context');
+    console.error('DEBUG: req.user is MISSING');
+    return res.status(401).json({ message: 'User context lost' });
   }
 
-  const ownerId = req.user._id;
-  const { projectId, ...payload } = req.body;
+  console.log('DEBUG: User ID:', req.user._id);
+  console.log('DEBUG: Body:', req.body);
 
-  const task = await createTask({ ownerId, projectId, payload });
+  try {
+    const ownerId = req.user._id;
+    const { projectId, ...payload } = req.body;
 
-  res.status(201).json({
-    status: 201,
-    message: 'Task created successfully',
-    data: task,
-  });
+    if (!projectId) {
+      return res.status(400).json({ message: 'projectId is required' });
+    }
+
+    const task = await createTask({ ownerId, projectId, payload });
+
+    res.status(201).json({
+      status: 201,
+      message: 'Task created successfully',
+      data: task,
+    });
+  } catch (error) {
+    console.error('DEBUG: Service Error:', error.message);
+    res.status(500).json({
+      message: 'Server Error during task creation',
+      error: error.message,
+    });
+  }
 };
 
 export const getTasksByProjectController = async (req, res) => {

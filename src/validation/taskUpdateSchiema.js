@@ -10,7 +10,7 @@ export const taskSchema = Joi.object({
     .default('To Do'),
   priority: Joi.string().valid('low', 'medium', 'high').default('medium'),
   deadline: Joi.date().allow(null),
-  assignedTo: Joi.string().hex().length(24).allow(null),
+  assignedTo: Joi.string().allow(null),
 });
 export const taskUpdateSchema = Joi.object({
   title: Joi.string(),
@@ -19,5 +19,5 @@ export const taskUpdateSchema = Joi.object({
   deadline: Joi.date().allow(null),
   order: Joi.number(),
   priority: Joi.string().valid('low', 'medium', 'high'),
-  assignedTo: Joi.string().hex().length(24).allow(null),
+  assignedTo: Joi.string().allow(null),
 });
