@@ -40,7 +40,7 @@ export const authenticate = async (req, res, next) => {
     return;
   }
 
+  console.log('Auth success for user:', user._id);
   req.user = user;
-
   next();
 };

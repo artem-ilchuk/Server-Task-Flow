@@ -8,9 +8,12 @@ import {
 import User from '../models/userSchema.js';
 
 export const createTaskController = async (req, res) => {
+  if (!req.user) {
+    throw createHttpError(401, 'User not found in request context');
+  }
+
   const ownerId = req.user._id;
-  const projectId = req.body.projectId;
-  const payload = req.body;
+  const { projectId, ...payload } = req.body;
 
   const task = await createTask({ ownerId, projectId, payload });
 
