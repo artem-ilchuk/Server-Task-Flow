@@ -1,4 +1,4 @@
-export const getNotifications = async (req, res) => {
+export const getLatestNotification = async (req, res) => {
   const events = [
     'New task assigned to you',
     'Project status updated',
