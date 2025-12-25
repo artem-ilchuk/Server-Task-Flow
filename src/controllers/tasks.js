@@ -35,7 +35,15 @@ export const createTaskController = async (req, res) => {
 export const getTasksByProjectController = async (req, res) => {
   const ownerId = req.user._id;
   const projectId = req.params.projectId;
-  const tasks = await getTasksByProject({ ownerId, projectId });
+
+  const { search, priority, status } = req.query;
+
+  const tasks = await getTasksByProject({
+    ownerId,
+    projectId,
+    filters: { search, priority, status },
+  });
+
   res.status(200).json({ status: 200, data: tasks });
 };
 

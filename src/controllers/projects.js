@@ -17,9 +17,16 @@ export const createProjectController = async (req, res) => {
 };
 
 export const getProjectsController = async (req, res) => {
-  const projects = await getProjectsByUser(req.user._id);
+  const ownerId = req.user._id;
 
-  res.json({ status: 200, data: projects });
+  const { search } = req.query;
+
+  const projects = await getProjectsByUser({ ownerId, search });
+
+  res.status(200).json({
+    status: 200,
+    data: projects,
+  });
 };
 
 export const getProjectByIdController = async (req, res) => {
